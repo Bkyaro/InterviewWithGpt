@@ -235,3 +235,53 @@ readFile("file1.txt")
 通过使用这些特性，可以显著提高代码的可读性和可维护性。
 
 <hr>
+
+## 👨🏻: 什么是 Promise 和 Promise chaining?
+
+🤖:
+
+### Promise
+
+Promise 是 JavaScript 中用于异步编程的一个重要概念。它代表了一个尚未完成但预期将来会完成的操作的最终结果。通过使用 Promise，开发者可以用更连贯和可预测的方式处理异步操作及其结果。一个 Promise 有三种状态：
+
+-   Pending（等待）：异步操作尚未完成。
+-   Fulfilled（已实现）：异步操作已完成，并且操作成功。
+-   Rejected（已拒绝）：异步操作已完成，但操作失败。
+
+#### 创建 Promise
+
+    Promise 是通过其构造函数创建的，构造函数接受一个执行器函数作为参数。执行器函数本身接受两个参数：resolve 和 reject，这两个参数也是函数。当异步操作成功时，调用 resolve 函数；当操作失败时，调用 reject 函数。
+
+```javascript
+let promise = new Promise((resolve, reject) => {
+	// 异步操作
+	let condition; // 假设这是某种条件
+	if (condition) {
+		resolve("Operation successful");
+	} else {
+		reject("Operation failed");
+	}
+});
+```
+
+#### 使用 Promise
+
+一旦 Promise 对象被创建，就可以使用.then()方法来处理成功的结果，使用.catch()方法来处理失败的结果。.then()方法本身返回一个新的 Promise，允许链式调用。
+
+### Promise Chaining
+
+Promise 链（Promise Chaining）是一种技术，它允许开发者将多个 Promise 连接在一起，以便一个操作的结果可以作为下一个操作的输入。这是通过在每个.then()调用的返回中继续另一个 Promise 操作来实现的。这样，可以避免嵌套调用（回调地狱），使代码更加清晰和易于管理。
+
+```javascript
+doSomething()
+	.then((result) => doSomethingElse(result))
+	.then((newResult) => doThirdThing(newResult))
+	.then((finalResult) => {
+		console.log(`Got the final result: ${finalResult}`);
+	})
+	.catch(failureCallback); // 如果链中的任何一个 Promise 被拒绝，.catch()会捕获到。
+```
+
+每个.then()接受一个产生结果的 Promise，并返回一个新的 Promise，使得可以继续链式调用。这种方式可以优雅地处理多步骤的异步操作流程，使得代码更加直观和易于维护。
+
+<hr>
