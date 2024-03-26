@@ -285,3 +285,59 @@ doSomething()
 每个.then()接受一个产生结果的 Promise，并返回一个新的 Promise，使得可以继续链式调用。这种方式可以优雅地处理多步骤的异步操作流程，使得代码更加直观和易于维护。
 
 <hr>
+
+## 👨🏻: 什么是 async / await ?
+
+🤖: async/await 是 JavaScript 中处理异步操作的一种现代语法，建立在 Promises 之上，提供了一种更简洁和更直观的方式来处理异步操作。这种语法让异步代码看起来和同步代码更相似，从而使得代码更易于理解和维护。
+
+### async
+
+async 关键字用于声明一个异步函数，它使得函数自动返回一个 Promise。如果这个函数正常结束，则 Promise 会被解决（resolve），返回值作为解决的值；如果函数抛出错误，则 Promise 会被拒绝（reject），抛出的错误作为拒绝的原因。
+
+```javascript
+async function fetchData() {
+	return "data received";
+}
+```
+
+这个异步函数返回一个解决为字符串'data received'的 Promise。
+
+### await
+
+await 关键字用于等待一个 Promise 完成，并获取 Promise 解决的值。它只能在 async 函数内部使用。当 await 一个 Promise 时，它会暂停该 async 函数的执行，直到 Promise 被解决，然后继续执行函数并返回解决的值。如果 Promise 被拒绝，await 会抛出拒绝的原因，可以用 try...catch 结构来捕获这个错误。
+
+```javascript
+async function fetchData() {
+	let data = await someAsyncOperation();
+	console.log(data); // 这里的data是someAsyncOperation解决的值
+}
+```
+
+### 使用场景
+
+async/await 让异步代码的编写和错误处理更加直观。它对于减少 Promise 链的使用、避免回调地狱（callback hell）非常有用，特别是在处理多个依赖于彼此结果的异步操作时。
+
+```javascript
+async function fetchData() {
+	try {
+		const data = await fetch("https://example.com/data");
+		const jsonData = await data.json();
+		return jsonData;
+	} catch (error) {
+		throw error;
+	}
+}
+
+// Using the async function
+fetchData()
+	.then((jsonData) => {
+		// Handle the retrieved data
+	})
+	.catch((error) => {
+		// Handle errors
+	});
+```
+
+这个例子展示了如何按顺序执行多个异步操作，也演示了如何使用 try...catch 来处理可能发生的错误。通过这种方式，async/await 提供了一种更优雅的异步编程模式。
+
+<hr>
