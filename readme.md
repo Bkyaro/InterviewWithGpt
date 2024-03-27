@@ -7,7 +7,7 @@
 <div align="center">
 
 | Tech Stack |               zh_CN                |               en_US                |
-| :--------- | :--------------------------------: | :--------------------------------: |
+| :---------: | :--------------------------------: | :--------------------------------: |
 | JavaScript | [javascript_cn](./javscript_cn.md) | [javascript_en](./javscript_cn.md) |
 
 </div>

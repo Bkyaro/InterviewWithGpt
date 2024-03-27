@@ -366,3 +366,268 @@ fetchData()
 由于==可能会导致一些不直观的结果，推荐在大多数情况下使用===进行比较，以避免意外的类型转换。
 
 <hr>
+
+## 👨🏻: 请介绍创建对象的不同方法。
+
+🤖:在 JavaScript 中，对象是键值对的集合。创建对象有多种方式，每种方式有其特定的用途和场景。下面是一些常见的创建对象的方法：
+
+### 1. 对象字面量
+
+这是创建对象最简单也是最直接的方式。它通过大括号`{}`来定义，内部可以直接写入键值对。
+
+```javascript
+const person = {
+	name: "John",
+	age: 30,
+};
+```
+
+### 2. 使用构造函数
+
+可以定义一个构造函数，然后使用`new`关键字创建对象的实例。这种方法适合需要创建多个相似对象的情况。
+
+```javascript
+function Person(name, age) {
+	this.name = name;
+	this.age = age;
+}
+
+const person1 = new Person("John", 30);
+```
+
+### 3. Object.create()
+
+`Object.create()`方法创建一个新对象，使用现有的对象来提供新创建的对象的`__proto__`。这种方法允许你选择一个对象作为新对象的原型。
+
+```javascript
+const personPrototype = {
+	greet() {
+		console.log("Hello, my name is " + this.name);
+	},
+};
+
+const person = Object.create(personPrototype);
+person.name = "John";
+person.greet(); // "Hello, my name is John"
+```
+
+### 4. 类语法（ES6）
+
+ES6 引入了`class`关键字，使得基于原型的对象创建更加接近传统的面向对象编程（OOP）。
+
+```javascript
+class Person {
+	constructor(name, age) {
+		this.name = name;
+		this.age = age;
+	}
+
+	greet() {
+		console.log(`Hello, my name is ${this.name}`);
+	}
+}
+
+const person = new Person("John", 30);
+person.greet();
+```
+
+### 5. 工厂函数
+
+工厂函数是一个函数，它返回一个新的对象。工厂函数不使用`new`关键字。这种方式很灵活，因为可以在函数内部执行一些逻辑来决定返回哪种对象。
+
+```javascript
+function createPerson(name, age) {
+	return {
+		name: name,
+		age: age,
+		greet() {
+			console.log(`Hello, my name is ${this.name}`);
+		},
+	};
+}
+
+const person = createPerson("John", 30);
+person.greet();
+```
+
+除了前面提到的方法，还有一些其他方式可以在 JavaScript 中创建对象，尽管它们可能不如前述方法常用。这些方法包括但不限于：
+
+### 6. 使用`new Object()`
+
+这是最基本的构造函数方法创建一个空对象，等同于使用空的对象字面量`{}`。
+
+```javascript
+const person = new Object();
+person.name = "John";
+person.age = 30;
+```
+
+### 7. 使用函数构造器 `Function()`
+
+虽然不推荐因为安全性和性能的原因，但理论上可以使用`Function`构造器创建一个新函数，然后作为构造器来创建对象。
+
+```javascript
+const Person = new Function(
+	"name",
+	"age",
+	`
+    this.name = name;
+    this.age = age;
+`
+);
+
+const person = new Person("John", 30);
+```
+
+### 8. 使用`Reflect.construct()`
+
+`Reflect.construct()`方法提供了一种调用构造函数的新方式，它允许你指定一个新对象的原型。这主要用于元编程场景。
+
+```javascript
+function Person(name, age) {
+	this.name = name;
+	this.age = age;
+}
+
+const person = Reflect.construct(Person, ["John", 30]);
+```
+
+### 9. 使用原型链直接赋值
+
+虽然现代 JavaScript 开发中不太推荐直接操作`__proto__`属性，但理论上可以通过设置对象的`__proto__`属性来直接指定对象的原型。
+
+```javascript
+const personProto = {
+	greet() {
+		console.log("Hello, my name is " + this.name);
+	},
+};
+
+const person = {
+	name: "John",
+	age: 30,
+};
+
+person.__proto__ = personProto;
+person.greet();
+```
+
+### 总结
+
+虽然有多种方式创建对象，推荐使用的方法依旧是对象字面量、构造函数、`Object.create()`、类语法和工厂函数，因为这些方法更加清晰、易于理解和维护。其他方法，如使用`new Object()`、`Function()`构造器或`Reflect.construct()`等，虽然在某些特定场景下可能有其用途，但一般不推荐在常规开发中使用。直接操作`__proto__`属性更是不推荐，因为这可能会影响代码的性能并带来潜在的维护问题。
+
+<hr>
+
+## 👨🏻: 介绍下 rest operator 和 spread operator
+
+🤖:在 JavaScript 中，剩余操作符（Rest Operator）和展开操作符（Spread Operator）都使用三个点`...`表示，但它们用在不同的上下文中，具有不同的作用。
+
+### Rest Operator（剩余操作符）
+
+剩余操作符允许我们将一个不确定数量的参数表示为一个数组。它在函数的参数列表中使用，用来收集函数调用时提供的剩余参数。
+
+```javascript
+function sum(...numbers) {
+	return numbers.reduce((acc, current) => acc + current, 0);
+}
+
+console.log(sum(1, 2, 3, 4)); // 输出 10
+```
+
+在这个例子中，`...numbers`是一个剩余参数，它将所有传递给`sum`函数的参数收集到一个名为`numbers`的数组中。
+
+### Spread Operator（展开操作符）
+
+展开操作符用于展开数组或对象的元素。在数组或函数调用时使用展开操作符，可以将数组元素或对象属性展开为单独的元素或键值对。
+
+#### 数组中使用：
+
+```javascript
+const numbers = [1, 2, 3];
+const newNumbers = [...numbers, 4, 5]; // 新数组为 [1, 2, 3, 4, 5]
+
+console.log(newNumbers);
+```
+
+#### 函数调用中使用：
+
+```javascript
+function sum(x, y, z) {
+	return x + y + z;
+}
+
+const numbers = [1, 2, 3];
+
+console.log(sum(...numbers)); // 相当于调用 sum(1, 2, 3)
+```
+
+#### 对象中使用：
+
+```javascript
+const person = { name: "John", age: 30 };
+const newPerson = { ...person, location: "New York" };
+
+console.log(newPerson); // 输出 { name: 'John', age: 30, location: 'New York' }
+```
+
+### 区别和联系
+
+-   **剩余操作符**用于函数定义中，将不确定数量的参数聚合成一个数组。
+-   **展开操作符**用于数组或对象，将其元素或属性展开成单独的元素或键值对。
+
+尽管它们使用相同的符号，但上下文的不同决定了它们是作为剩余操作符还是展开操作符。
+
+<hr>
+
+## 👨🏻: 什么是高阶函数
+
+🤖:高阶函数（Higher-order functions）是在函数式编程中一个非常核心的概念，它指的是至少满足下列一个条件的函数：
+
+1. 接受一个或多个函数作为输入。
+2. 输出一个函数。
+
+在 JavaScript 中，由于函数是一等公民（即函数也是一种数据类型，可以像其他数据类型一样被赋值、传递等），高阶函数是非常强大和常见的。它们允许我们抽象或封装行为，可以用来实现控制流、条件逻辑、迭代等，同时也是处理异步编程、事件处理等场景的基础。
+
+### 示例
+
+#### 作为参数的函数
+
+```javascript
+function repeat(n, action) {
+	for (let i = 0; i < n; i++) {
+		action(i);
+	}
+}
+
+repeat(3, console.log); // 打印 0 1 2
+```
+
+在这个例子中，`repeat`函数接受一个数字`n`和一个函数`action`作为参数，然后调用`action`函数`n`次。这里的`repeat`就是一个高阶函数，因为它接受了一个函数作为参数。
+
+#### 返回函数的函数
+
+```javascript
+function greaterThan(n) {
+	return (m) => m > n;
+}
+
+let greaterThan10 = greaterThan(10);
+console.log(greaterThan10(11)); // true
+```
+
+这里的`greaterThan`函数接受一个数字`n`，并返回一个新的函数，这个返回的函数接受一个参数`m`，检查`m`是否大于`n`。因为`greaterThan`返回了一个函数，所以它也是一个高阶函数。
+
+### 使用场景
+
+-   **数组方法**：JavaScript 的数组原型上有很多高阶函数，如`map`、`filter`、`reduce`等，它们都接受一个函数作为参数，对数组进行操作。
+
+    ```javascript
+    const numbers = [1, 2, 3, 4];
+    const doubled = numbers.map((number) => number * 2); // [2, 4, 6, 8]
+    ```
+
+-   **组合与管道**：可以通过高阶函数将多个函数组合起来，创建复杂的操作流程。
+
+-   **异步编程**：在处理异步操作，如事件监听、处理 Promises 时，高阶函数被广泛使用。
+
+高阶函数通过提供更高层次的抽象，使得代码更加简洁、灵活，并且易于复用和测试。它们是现代 JavaScript 编程中不可或缺的工具。
