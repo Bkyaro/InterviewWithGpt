@@ -518,7 +518,7 @@ person.greet();
 
 <hr>
 
-## 👨🏻: 介绍下 rest operator 和 spread operator
+## 👨🏻: 介绍下 rest operator 和 spread operator。
 
 🤖:在 JavaScript 中，剩余操作符（Rest Operator）和展开操作符（Spread Operator）都使用三个点`...`表示，但它们用在不同的上下文中，具有不同的作用。
 
@@ -579,7 +579,7 @@ console.log(newPerson); // 输出 { name: 'John', age: 30, location: 'New York' 
 
 <hr>
 
-## 👨🏻: 什么是高阶函数
+## 👨🏻: 什么是高阶函数？
 
 🤖:高阶函数（Higher-order functions）是在函数式编程中一个非常核心的概念，它指的是至少满足下列一个条件的函数：
 
@@ -631,3 +631,469 @@ console.log(greaterThan10(11)); // true
 -   **异步编程**：在处理异步操作，如事件监听、处理 Promises 时，高阶函数被广泛使用。
 
 高阶函数通过提供更高层次的抽象，使得代码更加简洁、灵活，并且易于复用和测试。它们是现代 JavaScript 编程中不可或缺的工具。
+
+<hr>
+
+## 👨🏻: 介绍一下闭包及其使用场景。
+
+🤖:闭包（Closure）是一个函数和该函数声明时所在的词法环境的组合。闭包让这个函数可以访问那个词法作用域内的变量，即使函数在其作用域外被调用。在 JavaScript 中，闭包发生在一个内部函数引用了其外部（封闭）函数的变量时。
+
+### 如何形成闭包
+
+闭包通常通过在一个函数内部创建另一个函数来实现：
+
+```javascript
+function outerFunction() {
+	let outerVariable = "I am outside!";
+
+	function innerFunction() {
+		console.log(outerVariable);
+	}
+
+	return innerFunction;
+}
+
+const myInnerFunction = outerFunction();
+myInnerFunction(); // 输出：I am outside!
+```
+
+在这个例子中，`innerFunction`是一个闭包，因为它能够访问并输出`outerFunction`中的`outerVariable`变量，即使是在`outerFunction`的执行上下文之外调用它。
+
+### 使用场景
+
+闭包有多种使用场景，包括但不限于：
+
+1. **数据封装和私有化**：闭包允许创建函数内的私有变量，只能通过特定的公共函数访问，从而控制对这些变量的访问。
+
+    ```javascript
+    function createCounter() {
+    	let count = 0;
+    	return {
+    		increment() {
+    			count++;
+    		},
+    		decrement() {
+    			count--;
+    		},
+    		getCount() {
+    			return count;
+    		},
+    	};
+    }
+
+    const counter = createCounter();
+    counter.increment();
+    console.log(counter.getCount()); // 1
+    ```
+
+2. **模拟块级作用域**（在`let`和`const`普及之前）：闭包可以用来模拟块级作用域，特别是在循环中创建函数时。
+
+    ```javascript
+    for (var i = 0; i < 3; i++) {
+    	(function (index) {
+    		setTimeout(function () {
+    			console.log(index);
+    		}, 1000 * index);
+    	})(i);
+    }
+    ```
+
+3. **回调函数和事件处理器**：闭包在异步编程中非常有用，特别是在使用回调函数和事件监听器时，因为它们允许回调函数访问其他作用域中的变量。
+
+    ```javascript
+    function setupButton(buttonId) {
+    	const button = document.getElementById(buttonId);
+    	button.addEventListener("click", function () {
+    		console.log(`Button ${buttonId} clicked`);
+    	});
+    }
+    ```
+
+4. **函数柯里化和函数组合**：闭包允许函数柯里化，即创建已预设某些参数的函数。这在函数式编程中是一个重要概念。
+
+    ```javascript
+    function multiply(a) {
+    	return function (b) {
+    		return a * b;
+    	};
+    }
+
+    const double = multiply(2);
+    console.log(double(5)); // 10
+    ```
+
+### 总结
+
+闭包是 JavaScript 编程中一个强大而重要的概念，使得函数具有非常灵活的表达力和强大的功能。通过闭包，函数可以访问并操作函数外部的变量，提供了数据封装、模块化和其他高级编程技巧的能力。
+
+<hr>
+
+## 👨🏻: 介绍一下 hoisting 提升。
+
+🤖:在 JavaScript 中，提升（Hoisting）是一种行为，使得函数声明和变量声明在代码执行之前被提前到其所在作用域的顶部。这意味着你可以在声明之前引用变量或函数。然而，提升的行为在变量和函数之间有所不同，理解这一点对于避免编程中的混淆和错误非常重要。
+
+### 函数提升
+
+函数声明会被完整地提升到其作用域的顶部，这意味着在函数声明之前就可以安全地调用函数。
+
+```javascript
+// 即使在函数声明之前调用，也可以正常工作，因为函数声明会被提升
+helloWorld();
+
+function helloWorld() {
+	console.log("Hello, world!");
+}
+```
+
+然而，函数表达式（包括使用`const`、`let`或`var`的箭头函数）不会被提升。如果你尝试在声明之前调用这样的函数，会得到一个 TypeError 或 ReferenceError。
+
+### 变量提升
+
+变量声明（不包括初始化）也会被提升到其作用域的顶部，但是有几个重要的细节需要注意：
+
+-   使用`var`声明的变量会被提升，但是它们的初始化值不会。在变量被实际声明（并初始化）之前，它们的值会是`undefined`。
+
+```javascript
+console.log(myVar); // undefined，因为声明被提升了，但是初始化没有
+var myVar = "value";
+```
+
+-   使用`let`和`const`声明的变量也会被提升，但它们不会被初始化为`undefined`。相反，它们被放在一个所谓的“暂时性死区”（Temporal Dead Zone, TDZ）直到声明语句被执行。如果你试图在声明之前访问它们，JavaScript 会抛出一个 ReferenceError。
+
+```javascript
+console.log(myLet); // ReferenceError: Cannot access 'myLet' before initialization
+let myLet = "value";
+```
+
+### 提升的实际行为
+
+虽然提升这一术语让人觉得变量和函数声明在物理上被移动到了代码的顶部，但实际上它们在编译阶段被加入到了作用域中。JavaScript 引擎在执行代码之前会先解析函数和变量声明，并把它们加入到相应的作用域，这就是为什么这些元素可以在声明之前被访问的原因。
+
+### 总结
+
+理解提升对于避免 JavaScript 中的一些常见错误非常重要。最佳实践是，尽可能地在作用域的顶部声明你的变量和函数，这样可以让提升的行为与你的代码结构相匹配，避免混淆和潜在的错误。
+
+<hr>
+
+## 👨🏻: 什么是暂时性死区？
+
+🤖: 暂时性死区（Temporal Dead Zone, TDZ）是 ES6 引入的概念，用于描述`let`和`const`声明的变量在作用域开始到实际声明位置之间的区域。在这个区域内，这些变量被绑定到了它们所在的作用域，但还不能被访问或使用；尝试访问这些变量会导致一个引用错误（ReferenceError）。这种行为是为了减少运行时的错误并提升代码的可维护性，因为它要求变量在使用前必须先声明。
+
+### TDZ 的工作原理
+
+当代码块（如一个函数体或一个花括号`{}`内的区域）执行进入时，`let`和`const`声明的变量即被绑定到了这个区域的作用域，但直到代码执行到变量的声明语句之前，这些变量都处于 TDZ 内。如果在变量声明之前尝试访问它们，JavaScript 会抛出 ReferenceError，表示你试图访问一个还未初始化的变量。
+
+### TDZ 与变量提升
+
+TDZ 的概念与变量提升（hoisting）密切相关。尽管`let`和`const`声明的变量在技术上也会被提升（即在编译阶段知道它们的存在），但与`var`不同的是，你不能在声明之前访问它们。这与`var`声明的行为不同，`var`声明的变量会在声明前被初始化为`undefined`，可以被访问但可能引起逻辑错误。
+
+### 示例
+
+```javascript
+console.log(a); // ReferenceError: Cannot access 'a' before initialization
+let a = 3;
+```
+
+在这个例子中，在变量`a`的声明语句之前尝试访问它会抛出 ReferenceError，因为`a`在这时处于 TDZ 内。
+
+### 为什么 TDZ 很重要
+
+TDZ 通过强制开发者在变量使用前声明，有助于避免运行时错误和提高代码清晰度。它鼓励更好的编程实践，比如：
+
+-   减少依赖于变量提升的代码，使代码更加可预测和易于理解。
+-   明确变量的使用范围和生命周期，有助于避免意外的全局变量污染。
+-   提醒开发者关注和规划变量的作用域和生命周期，从而编写出更稳定、更安全的代码。
+
+总的来说，TDZ 是 JavaScript 语言为了改善变量声明引入的一个有用特性，它促进了更加严格和清晰的代码编写习惯。
+
+<hr>
+
+## 👨🏻: 介绍一下原型链和 Object.create()。
+
+🤖:在 JavaScript 中，原型链是实现继承的主要机制。每个对象都有一个内部链接到另一个对象，称为其“原型”。该原型对象自身也有一个原型，以此类推，直到链接到`null`为止。这种一系列对象链接起来的结构就是原型链。当试图访问一个对象的属性时，如果在该对象上找不到，JavaScript 会沿着原型链向上查找，直到找到该属性或到达原型链的末端。
+
+### 原型链的工作原理
+
+每个 JavaScript 对象（除了`null`）都具有一个特殊的内部属性`[[Prototype]]`（在 ES5 之前通常通过`__proto__`属性暴露）。当你尝试访问一个对象的属性时，如果这个对象自身没有这个属性，解释器就会尝试在该对象的`[[Prototype]]`指向的对象上查找这个属性。如果那个原型对象也没有这个属性，再继续沿着原型链查找，直到找到这个属性或到达原型链的终点`null`。
+
+### Object.create()
+
+`Object.create()`方法是在 ES5 中引入的，它创建一个新对象，使用现有的对象来提供新创建对象的`[[Prototype]]`。这个方法允许你指定新对象的原型对象，从而实现对象之间的继承。
+
+#### 使用 Object.create()
+
+```javascript
+const person = {
+	isHuman: false,
+	printIntroduction: function () {
+		console.log(`My name is ${this.name}. Am I human? ${this.isHuman}`);
+	},
+};
+
+const me = Object.create(person);
+
+me.name = "Matthew"; // "name"是一个属于"me"的属性
+me.isHuman = true; // 继承的属性可以被覆盖
+
+me.printIntroduction(); // My name is Matthew. Am I human? true
+```
+
+在这个例子中，`me`对象是以`person`对象为原型创建的。`me`可以访问`person`的属性和方法，如`printIntroduction`方法。`Object.create()`提供了一种强大的继承方式，因为它允许你直接选择哪个对象应该作为新对象的原型。
+
+### 原型链的重要性
+
+原型链是 JavaScript 中实现继承的基础，它使得对象可以共享方法和属性。这不仅减少了内存的使用，也允许在运行时动态地修改原型，影响所有基于该原型创建的对象。虽然原型链提供了强大的继承能力，但过度使用或不当使用也可能导致维护困难和性能问题。因此，理解原型链如何工作以及何时使用它是掌握 JavaScript 的关键部分。
+
+<hr>
+
+## 👨🏻: 介绍一下 call bind apply 之间的区别。
+
+🤖: `call`、`bind`、和`apply`都是 JavaScript 中非常重要的函数方法，用于设置函数调用时的`this`值。尽管它们的目的相同，但在使用方式和场景上存在差异。
+
+### call
+
+`call`方法调用一个函数，其第一个参数将作为函数运行时的`this`值。之后的参数将作为函数执行时的参数传入。
+
+```javascript
+function greet(language) {
+	console.log(`${language}: Hello, ${this.name}`);
+}
+
+const user = { name: "John" };
+
+greet.call(user, "English"); // English: Hello, John
+```
+
+### apply
+
+`apply`方法与`call`非常相似，区别在于`apply`接受两个参数：第一个参数是`this`值，第二个参数是一个数组，数组中的元素将作为函数执行时的参数传入。
+
+```javascript
+function greet(language) {
+	console.log(`${language}: Hello, ${this.name}`);
+}
+
+const user = { name: "John" };
+
+greet.apply(user, ["English"]); // English: Hello, John
+```
+
+### bind
+
+`bind`方法创建一个新的函数，在`bind`被调用时，这个新函数的`this`被指定为`bind`的第一个参数，而其余参数将作为新函数的参数，供调用时使用。
+
+```javascript
+function greet(language) {
+	console.log(`${language}: Hello, ${this.name}`);
+}
+
+const user = { name: "John" };
+const greetEnglish = greet.bind(user, "English");
+
+greetEnglish(); // English: Hello, John
+```
+
+### 区别和使用场景
+
+-   **call** 和 **apply** 都是立即执行函数，但参数的传递方式不同：`call`需要将函数参数依次传入，而`apply`则是把函数参数放在一个数组中传入。
+-   **bind** 不会立即执行函数，而是返回一个改变了上下文`this`后的新函数。这在事件处理和异步编程中特别有用，当你需要将函数延迟执行，同时又要保持`this`上下文时。
+
+选择`call`、`apply`或`bind`的依据主要取决于你是否需要立即执行函数以及你如何传递参数。了解它们之间的区别有助于在不同的编程场景中做出更合适的选择。
+
+<hr>
+
+## 👨🏻: 介绍一下箭头函数。
+
+🤖:箭头函数是 ES6 (ECMAScript 2015)中引入的一种新的函数语法，提供了一种更简洁的方式来写函数表达式。箭头函数有几个特点和使用场景，让它们在某些情况下比传统的函数表达式更有优势。
+
+### 语法
+
+箭头函数的基本语法如下：
+
+```javascript
+const functionName = (parameters) => {
+	// 函数体
+};
+```
+
+如果箭头函数直接返回一个值，可以省略花括号并直接写表达式，这时候函数会自动返回该表达式的结果：
+
+```javascript
+const add = (a, b) => a + b;
+```
+
+如果只有一个参数，还可以省略参数周围的括号：
+
+```javascript
+const square = (x) => x * x;
+```
+
+没有参数的情况下，需要使用一对空括号：
+
+```javascript
+const logHello = () => console.log("Hello");
+```
+
+### 特点
+
+1. **更简洁的语法**：箭头函数提供了一种更加简洁的函数书写方式，特别是对于单行函数。
+
+2. **没有自己的`this`**：箭头函数不创建自己的`this`上下文，因此`this`值指向的是定义箭头函数时的上下文（词法作用域）。这使得箭头函数成为处理事件回调和定时器时的理想选择。
+
+3. **不绑定`arguments`对象**：传统的函数可以通过`arguments`对象访问其参数列表，而箭头函数不绑定`arguments`对象。如果箭头函数需要访问参数列表，可以使用剩余参数（`...args`）语法。
+
+4. **不能作为构造函数**：箭头函数不能使用`new`关键字调用。尝试这么做会抛出一个错误，因为箭头函数没有`[[Construct]]`方法。
+
+5. **没有原型属性**：箭头函数没有`prototype`属性，因为它们本意不是被用作构造函数的。
+
+### 使用场景
+
+-   **回调函数**：箭头函数经常用作回调函数，特别是在数组方法或异步任务中。
+
+-   **事件处理器**：由于箭头函数不绑定自己的`this`，它们在事件处理函数中特别有用，可以确保`this`指向期望的上下文。
+
+-   **函数式编程**：由于其简洁性，箭头函数在函数式编程模式中广泛使用，如在使用`.map`、`.filter`、`.reduce`等数组方法时。
+
+箭头函数提供了一个更加简洁和现代的方式来声明函数，同时解决了一些传统函数表达式中的常见问题，如`this`关键字的绑定。理解它们的特点和限制对于高效地使用 JavaScript 是非常重要的。
+
+<hr>
+
+## 👨🏻: 介绍一下柯里化函数
+
+🤖:柯里化（Currying）是一种在函数式编程中常用的技术，它指的是将一个接受多个参数的函数转换成一系列使用一个参数的函数的过程。柯里化的函数通常返回另一个函数，直到所有参数都被处理完毕。这种技术可以让函数的调用更加灵活，使得函数的复用性和适用性得到提升。
+
+### 柯里化的基本概念
+
+假设有一个函数`f(a, b, c)`，通过柯里化，它可以被转换成`f(a)(b)(c)`。每次调用函数时只传递一个参数，返回一个新的函数来处理下一个参数，直到所有参数都被处理完。
+
+### 柯里化的实现
+
+一个简单的柯里化函数实现例子如下：
+
+```javascript
+function curry(fn) {
+	return function curried(...args) {
+		if (args.length >= fn.length) {
+			return fn.apply(this, args);
+		} else {
+			return function (...args2) {
+				return curried.apply(this, args.concat(args2));
+			};
+		}
+	};
+}
+
+// 使用例子
+function sum(a, b, c) {
+	return a + b + c;
+}
+
+const curriedSum = curry(sum);
+
+console.log(curriedSum(1)(2)(3)); // 6
+console.log(curriedSum(1, 2)(3)); // 也支持部分应用
+```
+
+这个`curry`函数检查给定函数所需要的参数数量和当前传递的参数数量。如果参数足够，它就调用原始函数；如果不够，它返回一个新函数来请求更多的参数。
+
+### 柯里化的使用场景
+
+1. **参数复用**：柯里化允许你创建已经设置好一个或多个参数的函数。这在你需要多次调用一个函数，并且一部分参数在这些调用中保持不变时非常有用。
+
+2. **延迟计算**：柯里化可以创建一个延迟执行的函数，直到收到所有需要的参数之后，最终结果才会被计算出来。
+
+3. **动态生成函数**：柯里化可以基于某些参数动态地生成函数，以便于复用和配置。
+
+### 总结
+
+柯里化是函数式编程中的一个核心概念，它提供了一种强大的方法来构建更为模块化和可重用的代码。通过柯里化，可以把函数的调用分解成可管理的部分，使得代码更加灵活和表达力强。
+
+<hr>
+
+## 👨🏻: 介绍 ES6 新特性。
+
+🤖:ECMAScript 2015（也称为 ES6）是 JavaScript 语言的一个重要里程碑，引入了许多新特性和改进，旨在使代码更加简洁、易于开发和维护。以下是 ES6 的一些关键特性和特点：
+
+### 1. `let`和`const`
+
+-   **`let`**：引入了块级作用域变量声明，比传统的`var`提供了更好的作用域控制。
+-   **`const`**：用于声明常量，一旦赋值后不能改变。`const`也具有块级作用域。
+
+### 2. 箭头函数（Arrow Functions）
+
+提供了一种更简洁的函数写法，使得函数定义更加简单，同时箭头函数没有自己的`this`，`this`值是继承自上下文。
+
+### 3. 类（Classes）
+
+ES6 引入了类的概念，使得基于原型的对象创建更接近传统的面向对象编程（OOP），包括构造函数、继承等特性。
+
+### 4. 模板字符串（Template Literals）
+
+允许嵌入表达式的字符串字面量，可以使用反引号（`` ` ``）来定义，使得字符串操作更加方便。
+
+### 5. 解构赋值（Destructuring Assignment）
+
+允许从数组或对象中提取数据并赋值给新的变量，使得数据访问更直观简单。
+
+### 6. 默认参数、剩余参数和展开操作符
+
+-   **默认参数**：允许在函数定义时为参数指定默认值。
+-   **剩余参数**：使用`...`操作符将一个不定数量的参数表示为数组。
+-   **展开操作符**：同样使用`...`操作符，可以在函数调用、数组和对象字面量中展开元素。
+
+### 7. Promises
+
+提供了一种更好的异步编程解决方案，允许回调函数的链式调用，减少回调地狱的问题。
+
+### 8. 模块化（Modules）
+
+ES6 原生支持模块化语法，使用`import`和`export`语句来导入和导出模块成员。
+
+### 9. 新的数据结构
+
+引入了`Map`、`Set`等新的数据结构，以及对应的`WeakMap`和`WeakSet`，为数据存储提供了更多的选择和灵活性。
+
+### 10. 迭代器（Iterators）和生成器（Generators）
+
+通过迭代器协议和`for...of`循环提供了一种统一的接口来遍历数据结构。生成器函数允许通过`yield`关键字定义一个可迭代的自定义行为。
+
+### 11. Symbol
+
+引入了一种新的原始数据类型`Symbol`，用于创建唯一的标识符，常用作对象属性的键。
+
+### 12. Proxy 和 Reflect
+
+`Proxy`用于定义对象的自定义行为，`Reflect`提供了一系列与对象操作相关的静态方法。这两个特性共同为操作和拦截 JavaScript 对象提供了强大的能力。
+
+ES6 的这些特性极大地丰富了 JavaScript 的表达力和编程便利性，被广泛应用于现代 Web 开发中。
+
+<hr>
+## 👨🏻: 什么是执行上下文、执行堆栈、变量对象和作用域链?
+
+🤖:在 JavaScript 中，理解执行上下文（Execution Context）、执行堆栈（Execution Stack）、变量对象（Variable Object）和作用域链（Scope Chain）对于深入了解语言的工作原理至关重要。这些概念是 JavaScript 执行代码时的基础。
+
+### 执行上下文（Execution Context）
+
+执行上下文是评估和执行 JavaScript 代码的环境。每当函数被调用时，都会为该函数创建一个新的执行上下文。执行上下文包括变量对象、作用域链以及`this`的值。
+
+JavaScript 运行时，会有三种类型的执行上下文：
+
+-   **全局执行上下文**：最外层的上下文，任何不在函数内部的代码都在全局上下文中。它只有一个，在浏览器中，全局上下文等同于`window`对象。
+-   **函数执行上下文**：每当一个函数被调用时，就会为该函数创建一个新的上下文。
+-   **Eval 执行上下文**：执行在`eval`函数内部的代码。
+
+### 执行堆栈（Execution Stack）
+
+执行堆栈，也称为“调用堆栈”，是一个用于存储在代码执行期间创建的所有执行上下文的栈结构。当脚本开始执行时，JavaScript 引擎首先创建一个全局执行上下文并推入执行堆栈。每当一个函数被调用时，引擎都会为该函数创建一个新的执行上下文并推入堆栈顶部。当前函数执行完成后，其执行上下文会从堆栈中弹出，控制流程返回到当前上下文的下一个上下文中。
+
+### 变量对象（Variable Object）
+
+变量对象是与执行上下文相关的数据作用域，它存储了在上下文中定义的变量和函数声明。在函数执行上下文中，参数对象也被存储在变量对象中。在 ES6 中，变量对象的概念被词法环境（Lexical Environment）和变量环境（Variable Environment）所取代，提供了更精确的控制和更丰富的信息。
+
+### 作用域链（Scope Chain）
+
+作用域链确保对执行上下文有效的所有变量和函数的有序访问。在 JavaScript 中，函数创建时会创建作用域链，用来解析变量的名称。如果一个变量在当前的执行上下文中未被找到，引擎会沿着作用域链向上查找，直到找到该变量或到达全局上下文为止。作用域链的前端始终是当前执行的代码的变量对象。
+
+### 总结
+
+执行上下文是 JavaScript 代码评估和执行的环境，执行堆栈是这些上下文按时间顺序存储的结构，变量对象存储了上下文中的所有变量和函数声明，而作用域链是确保对这些变量和函数有序访问的机制。理解这些概念对于深入了解 JavaScript 的工作原理和优化代码非常重要。
