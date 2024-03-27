@@ -1097,3 +1097,497 @@ JavaScript 运行时，会有三种类型的执行上下文：
 ### 总结
 
 执行上下文是 JavaScript 代码评估和执行的环境，执行堆栈是这些上下文按时间顺序存储的结构，变量对象存储了上下文中的所有变量和函数声明，而作用域链是确保对这些变量和函数有序访问的机制。理解这些概念对于深入了解 JavaScript 的工作原理和优化代码非常重要。
+
+<hr>
+
+## 👨🏻: callback、promise、setTimeout、process.nextTick()的执行优先级是什么?
+
+🤖:
+在 JavaScript（特别是在 Node.js 环境中）中理解不同类型异步操作的执行顺序，包括回调函数（callback）、Promise、`setTimeout`，以及`process.nextTick()`的执行优先级，对于编写高效且可预测的异步代码非常重要。这里的执行顺序涉及到 JavaScript 事件循环和微任务（microtask）与宏任务（macrotask）的概念。
+
+### 执行顺序概述
+
+1. **`process.nextTick()`**（仅 Node.js 环境）：将回调函数放入 next tick 队列。这些回调函数在事件循环的当前阶段完成后、下一个事件循环阶段之前执行。`process.nextTick()`不是事件循环的一部分，而是在当前操作完成后立即执行的。
+
+2. **Promise（微任务）**：Promise 回调（`then/catch/finally`）被放入微任务队列，微任务队列在每个宏任务执行完后执行，但在下一个宏任务开始前。所有微任务完成后，才会继续下一个宏任务。
+
+3. **`setTimeout`（宏任务）**：`setTimeout`回调被放入宏任务队列，其执行将等待至下一个事件循环迭代时。如果有多个宏任务队列，`setTimeout`的回调可能会在其他类型的宏任务之后执行。
+
+4. **普通回调函数（callback）**：普通回调函数的执行时机取决于它们被如何使用。例如，如果它们作为`setTimeout`、`setImmediate`（Node.js 中的宏任务）或`Promise`的回调，它们的执行时机将遵循对应的规则。没有特定的“回调函数”队列，它们的执行依赖于它们被放入的上下文。
+
+### 执行优先级
+
+总结一下，异步操作的执行优先级从高到低为：
+
+1. `process.nextTick()`队列（Node.js 环境）：在当前宏任务的末尾、下一个宏任务开始前。
+2. 微任务（Promise 回调）：在每个宏任务结束后立即执行。
+3. 宏任务（如`setTimeout`、`setImmediate`）：在事件循环的不同迭代中按照它们被添加到队列中的顺序执行。
+
+这意味着，在同一个事件循环迭代中，`process.nextTick()`的回调最先执行，然后是 Promise 的回调，最后是`setTimeout`（和其他宏任务）的回调。理解这个顺序对于编写既高效又正确的异步代码至关重要。
+
+<hr>
+
+## 👨🏻: 什么是工厂函数和生成器函数
+
+🤖:在 JavaScript 中，工厂函数（Factory Functions）和生成器函数（Generator Functions）是两种不同的函数，它们在功能和用途上有所区别。
+
+### 工厂函数（Factory Functions）
+
+工厂函数是一种设计模式，使用普通的函数来创建并返回对象。工厂函数通常不使用`new`关键字调用。这种模式的优点是可以在不使用类语法的情况下创建具有封装和组织性的对象。工厂函数也可以访问其外部作用域中的变量，这使得它们可以用来创建具有私有状态和行为的对象。
+
+#### 工厂函数示例
+
+```javascript
+function createPerson(name, age) {
+	return {
+		name: name,
+		age: age,
+		greet() {
+			console.log(
+				`Hello, my name is ${this.name} and I am ${this.age} years old.`
+			);
+		},
+	};
+}
+
+const person = createPerson("John", 30);
+person.greet(); // 输出: Hello, my name is John and I am 30 years old.
+```
+
+这个例子中的`createPerson`函数就是一个工厂函数，它创建并返回了一个新的对象。
+
+### 生成器函数（Generator Functions）
+
+生成器函数是 ES6 引入的一个新特性，它允许函数生成多个值（通过`yield`表达式），并在每次产生值（或完成）时暂停和恢复其执行上下文。生成器函数在定义时需要在`function`关键字后面加一个星号`*`，并且通过`yield`关键字来产出（yield）值。生成器函数调用时返回一个遵循迭代器协议的生成器对象，该对象可以被用来控制函数的执行。
+
+#### 生成器函数示例
+
+```javascript
+function* generateSequence() {
+	yield 1;
+	yield 2;
+	return 3;
+}
+
+const generator = generateSequence();
+console.log(generator.next()); // { value: 1, done: false }
+console.log(generator.next()); // { value: 2, done: false }
+console.log(generator.next()); // { value: 3, done: true }
+```
+
+在这个例子中，`generateSequence`是一个生成器函数，它依次产生 1 和 2，然后返回 3。每次调用`generator.next()`都会恢复函数执行，直到遇到下一个`yield`或函数结束。
+
+### 总结
+
+-   **工厂函数**用于创建并返回新的对象，是一种创建对象的方法，不依赖于类或构造函数。
+-   **生成器函数**允许函数按需产生一系列值，可以用来实现自定义的迭代器或与异步编程模式结合使用。
+
+这两种函数类型在 JavaScript 中有着各自的应用场景和用途，理解它们的区别和如何使用对于编写高效且易于维护的代码非常重要。
+
+<hr>
+## 👨🏻: 说说对象的深克隆和浅克隆
+
+🤖:在 JavaScript 中，克隆对象是一种常见的需求，尤其是当你需要复制对象而不希望新对象和原始对象之间有引用关系时。根据克隆的深度，克隆可以分为浅克隆（Shallow Clone）和深克隆（Deep Clone）。
+
+### 浅克隆（Shallow Clone）
+
+浅克隆只复制对象的第一层属性。如果原始对象的属性值是基本类型（如 String、Number），则直接复制值；如果属性值是复合类型（如 Array、Object），则复制引用。这意味着，如果复合类型属性被修改，这些修改会反映在原始对象和克隆对象上。
+
+#### 浅克隆的实现方法
+
+-   **Object.assign()**
+
+    ```javascript
+    const original = { a: 1, b: { c: 2 } };
+    const clone = Object.assign({}, original);
+    clone.a = 100;
+    clone.b.c = 200;
+
+    console.log(original); // { a: 1, b: { c: 200 } }
+    ```
+
+-   **Spread Operator (...)**
+
+    ```javascript
+    const original = { a: 1, b: { c: 2 } };
+    const clone = { ...original };
+    clone.a = 100;
+    clone.b.c = 200;
+
+    console.log(original); // { a: 1, b: { c: 200 } }
+    ```
+
+在这两个例子中，修改`clone.b.c`同样会修改`original.b.c`，因为`b`对象是通过引用复制的。
+
+### 深克隆（Deep Clone）
+
+深克隆会复制对象的所有层级，创建一个完全独立的副本。这意味着无论原始对象的结构有多复杂，深克隆都会创建一个完整的副本，原始对象和克隆对象之间不会共享任何引用。
+
+#### 深克隆的实现方法
+
+-   **JSON.parse() 和 JSON.stringify()**
+
+    这是实现深克隆的一个简单但有局限性的方法。它无法正确处理函数、循环引用、特殊对象（如`Date`、`RegExp`、`Map`、`Set`等）。
+
+    ```javascript
+    const original = { a: 1, b: { c: 2 }, d: new Date() };
+    const clone = JSON.parse(JSON.stringify(original));
+    clone.b.c = 200;
+
+    console.log(original); // { a: 1, b: { c: 2 }, d: Date object }
+    console.log(clone.d instanceof Date); // false, d is now a string
+    ```
+
+    在这个例子中，`original`对象和`clone`对象之间没有引用关系，但是`Date`对象被转换成了字符串。
+
+-   **库函数**
+
+    对于更复杂的对象或需要处理特殊情况（如函数、循环引用等），使用库（如 Lodash 的`_.cloneDeep`方法）是一个更好的选择。
+
+    ```javascript
+    // 使用Lodash的cloneDeep
+    const clone = _.cloneDeep(original);
+    ```
+
+深克隆相比于浅克隆更加复杂且资源消耗更大，应当根据实际需求谨慎选择使用。在处理简单对象或仅需克隆对象的顶层属性时，浅克隆是一个快速且有效的选择。对于需要完全独立副本的场景，深克隆则是必要的。
+
+<hr>
+
+## 👨🏻: 如何使一个对象不可变
+
+🤖:在 JavaScript 中，使对象不可变（Immutable）意味着一旦对象被创建，它的状态就不能再改变。这在函数式编程中尤其重要，因为它有助于防止意外修改数据，从而减少了程序中的副作用和 bug。JavaScript 提供了几种方法来实现对象的不可变性：
+
+### 1. `Object.freeze()`
+
+`Object.freeze()` 方法可以冻结一个对象。一个被冻结的对象再也不能被修改；冻结了一个对象后，不能向这个对象添加新的属性，不能删除已有属性，不能修改该对象已有属性的可枚举性、可配置性、可写性，以及不能修改已有属性的值。此外，冻结一个对象后该对象的原型也不能被修改。`freeze()` 返回和传入的参数相同的对象。
+
+```javascript
+const obj = { a: 1 };
+Object.freeze(obj);
+
+obj.a = 2; // 尝试修改对象
+console.log(obj.a); // 1
+```
+
+需要注意的是，`Object.freeze()` 是浅层的，它只能冻结对象本身的属性，而对象内部的对象还是可以被修改的。
+
+### 2. `Object.seal()`
+
+`Object.seal()` 方法可以让一个对象密封，并返回被密封后的对象。密封后的对象将不能添加新属性，且不能删除已有属性，但可以修改已有属性的值（如果这些属性是可写的）。
+
+```javascript
+const obj = { a: 1 };
+Object.seal(obj);
+
+obj.a = 2; // 修改对象属性的值
+obj.b = 3; // 尝试添加新的属性
+delete obj.a; // 尝试删除属性
+console.log(obj); // { a: 2 }
+```
+
+### 3. 使用`const`声明
+
+虽然`const`声明并不直接使一个对象不可变，但它可以防止对象的重新赋值。结合`Object.freeze()`或`Object.seal()`，可以更加有效地保证对象的不可变性。
+
+```javascript
+const obj = { a: 1 };
+Object.freeze(obj);
+
+// obj = { b: 2 }; // TypeError: Assignment to constant variable.
+```
+
+### 4. 函数式编程库
+
+一些函数式编程库（如 Immutable.js、Mori）提供了不可变数据结构的实现。这些库通过使用特殊的方法和数据结构来保证数据的不可变性，而不是直接操作 JavaScript 原生对象。
+
+```javascript
+// 使用Immutable.js
+const { Map } = require("immutable");
+const map1 = Map({ a: 1, b: 2, c: 3 });
+const map2 = map1.set("b", 50);
+
+console.log(map1.get("b")); // 2
+console.log(map2.get("b")); // 50
+```
+
+选择哪种方法取决于你的具体需求。对于大多数简单的用例，`Object.freeze()`可能已经足够。但是，如果你正在处理复杂的数据结构或需要深层次的不可变性，那么考虑使用 Immutable.js 之类的库可能是一个更好的选择。
+
+<hr>
+
+## 👨🏻: 什么是事件、事件流、事件冒泡和事件捕获？
+
+🤖:在 Web 开发中，理解事件、事件流、事件冒泡和事件捕获是处理 DOM 交互的基础。
+
+### 事件（Event）
+
+事件是文档或浏览器窗口中发生的事情或动作，可以由用户行为（如点击、滚动、按键等）或浏览器自身（如页面加载完成）触发。JavaScript 和 HTML 允许你通过事件监听器对这些事件做出反应，执行代码。例如，当用户点击按钮时，可以触发一个函数。
+
+### 事件流（Event Flow）
+
+事件流描述的是从页面中接收事件的顺序。当事件发生时，它不是在一个单独的点上发生，而是按照特定的顺序或路径进行传播。事件流有两种模型：事件冒泡（Event Bubbling）和事件捕获（Event Capturing）。
+
+### 事件冒泡（Event Bubbling）
+
+事件冒泡是指事件从最具体的元素（文档树中最深的节点）开始发生，然后逐级向上传播到较为不具体的节点（文档）。例如，如果你在一个按钮上点击，点击事件会首先在按钮上触发，然后是其父元素，接着是父元素的父元素，一直冒泡到文档的根元素。
+
+### 事件捕获（Event Capturing）
+
+与事件冒泡相反，事件捕获的概念是指事件从文档的根节点开始发生，然后逐级向下传播到目标元素。事件捕获的目的是在事件到达预定目标之前捕获它。
+
+### 监听事件和事件的三个阶段
+
+当一个事件发生并传播时，它将经历以下三个阶段：
+
+1. **捕获阶段**：事件从文档的根节点往下传播到目标元素的路径上的节点。
+2. **目标阶段**：事件到达目标元素，触发目标元素的监听函数。
+3. **冒泡阶段**：事件从目标元素开始向上冒泡，经过路径上的所有节点。
+
+在使用`addEventListener`方法时，你可以指定监听函数是在冒泡阶段还是捕获阶段执行。如果第三个参数设置为`true`，则表示在捕获阶段调用事件处理程序；如果省略或设置为`false`，则在冒泡阶段处理事件。
+
+```javascript
+element.addEventListener(
+	"click",
+	function (event) {
+		// 处理事件
+	},
+	false
+); // false或不设置则在冒泡阶段处理，true则在捕获阶段处理
+```
+
+### 总结
+
+事件、事件流、事件冒泡和事件捕获是 DOM 编程的基本概念，了解和正确使用这些概念对于创建交互丰富的 Web 应用非常重要。通过适当使用事件监听器，可以有效地响应用户操作，提升用户体验。
+
+<hr>
+
+## 👨🏻: 什么是事件委托
+
+🤖:事件委托是一种常用的事件处理模式，它利用了事件冒泡的机制来优化事件监听。在这种模式下，不是将事件监听器直接绑定在目标元素上，而是将事件监听器绑定到目标元素的父元素或更高级别的祖先元素上，然后根据事件的冒泡原理来管理子元素的事件。
+
+### 事件委托的工作原理
+
+当一个事件在其目标元素（如按钮）上被触发时，如果该元素有事件监听器绑定，事件会被处理；然后事件会沿着 DOM 树向上冒泡，依次触发每个父元素的相应事件监听器。事件委托正是利用了这一冒泡行为，通过在父元素上监听事件来管理多个子元素的事件。当事件到达父元素时，可以使用事件对象的属性（如`target`）来判断事件实际上是在哪个子元素上被触发的，并相应地处理事件。
+
+### 事件委托的优点
+
+1. **减少内存消耗**：不需要为每个子元素单独绑定事件监听器，减少了内存的使用，特别是当有大量子元素需要处理事件时。
+2. **动态元素的事件处理**：对于在页面加载后动态添加到 DOM 中的元素，不需要重新绑定事件监听器。只要这些动态元素匹配父元素的事件委托条件，就可以自动响应事件。
+3. **简化事件管理**：可以在一个地方管理和维护所有的事件处理逻辑，使得代码更加简洁和易于管理。
+
+### 实现事件委托的例子
+
+假设有一个任务列表，每个任务项点击时需要处理事件，可以将事件监听器绑定到它们的父元素上，而不是每个任务项上：
+
+```html
+<ul id="taskList">
+	<li>Task 1</li>
+	<li>Task 2</li>
+	<li>Task 3</li>
+</ul>
+```
+
+```javascript
+const taskList = document.getElementById("taskList");
+
+taskList.addEventListener("click", function (e) {
+	// 检查事件源（e.target）是否为我们关心的元素
+	if (e.target.tagName === "LI") {
+		console.log("Task item clicked:", e.target.textContent);
+	}
+});
+```
+
+在这个例子中，无论列表中有多少个任务项，只需要在它们的父元素`<ul>`上绑定一个点击事件监听器。这个监听器会检查点击事件的实际目标，如果是列表项(`<li>`)，则执行相应的逻辑。
+
+### 总结
+
+事件委托是一种利用事件冒泡原理来优化事件监听的有效方法。它通过在父元素上监听子元素的事件来减少内存使用、简化事件管理，并且自然地支持动态添加的元素。在开发复杂的 Web 应用时，合理使用事件委托可以大大提高应用的性能和可维护性。
+
+<hr>
+
+## 👨🏻: 介绍下 server sent event(SSE)
+
+🤖:Server-Sent Events（SSE）是一种允许服务器主动向浏览器发送事件的技术。与 WebSocket 不同，SSE 是单向通信，即信息流从服务器流向客户端（浏览器），而不是双向的。SSE 被设计用来处理实时消息传输的场景，如推送消息、更新通知等，且仅使用 HTTP 协议。
+
+### 特点
+
+1. **简单性**：SSE 使用简单的 HTTP 协议，易于实现和理解。
+2. **文本编码**：SSE 传输的数据默认使用 UTF-8 编码的文本。
+3. **自动重连**：如果连接断开，浏览器会自动尝试重新连接到服务器。
+4. **单向通信**：数据流只能从服务器到客户端，如果需要客户端到服务器的通信，仍需另外的技术，如 Ajax。
+
+### 如何使用
+
+#### 服务器端
+
+服务器端需要设置 HTTP 响应头`Content-Type`为`text/event-stream`，然后按照 SSE 的格式发送消息。消息以一系列以双换行符分隔的事件块组成，每个事件块可以包含多个以单换行符分隔的字段。
+
+```javascript
+// Node.js示例
+const http = require("http");
+
+http.createServer((req, res) => {
+	res.writeHead(200, {
+		"Content-Type": "text/event-stream",
+		"Cache-Control": "no-cache",
+		Connection: "keep-alive",
+	});
+
+	const id = Date.now();
+	const data = JSON.stringify({ message: "Hello, world!" });
+
+	// 发送事件
+	res.write(`id: ${id}\n`);
+	res.write(`data: ${data}\n\n`); // 注意双换行符结束事件块
+
+	setInterval(() => {
+		const id = Date.now();
+		const data = JSON.stringify({ message: "Periodic message" });
+		res.write(`id: ${id}\n`);
+		res.write(`data: ${data}\n\n`);
+	}, 10000); // 每10秒发送一次消息
+}).listen(8000);
+```
+
+#### 客户端
+
+客户端使用`EventSource`接口监听服务器发送的事件。可以指定监听特定类型的事件，或使用`onmessage`处理所有接收到的消息。
+
+```html
+<script>
+	const evtSource = new EventSource("http://localhost:8000");
+
+	evtSource.onmessage = function (event) {
+		const data = JSON.parse(event.data);
+		console.log(data.message);
+	};
+
+	// 监听自定义事件
+	evtSource.addEventListener("myEvent", function (event) {
+		const data = JSON.parse(event.data);
+		console.log(data);
+	});
+</script>
+```
+
+### 应用场景
+
+-   实时通知和更新（如新闻、天气更新）
+-   股票或其他金融数据的实时报价
+-   实时日志或监控数据的流显示
+
+### 限制
+
+-   仅支持文本数据，不支持二进制传输。
+-   默认情况下，跨域请求受限，需要服务器端显式允许 CORS。
+-   由于单向通信的特性，如果需要双向通信，则可能需要结合其他技术，如 WebSocket。
+
+尽管有一些限制，Server-Sent Events 因其简单性和基于标准 HTTP 的特性，在适合的场景下仍然是一个非常有用的实时数据传输方案。
+
+## 👨🏻: 介绍下 web worker 和 service worker
+
+🤖:在 Web 开发中，Web Workers 和 Service Workers 提供了在浏览器中运行代码的能力，而不会干扰主线程的执行。尽管它们的目标和使用场景不同，但都是现代 Web 应用中提高性能和用户体验的重要工具。
+
+### Web Worker
+
+Web Worker 提供了一种将长时间运行的脚本运行在后台线程中的能力，从而使主线程（通常是 UI 线程）不会被阻塞或干扰。这对于执行密集计算的任务特别有用，比如图像处理、大数据计算等，因为它们不会导致用户界面的冻结或延迟。
+
+-   **特点**：
+
+    -   Web Workers 运行在与主线程分离的后台线程中。
+    -   不能直接访问 DOM。
+    -   通过消息传递与主线程通信。
+    -   支持多种类型的 workers，包括专用 workers 和共享 workers。
+
+-   **使用场景**：适用于需要长时间运行或复杂计算的任务，以避免阻塞 UI 线程，改善应用性能和响应性。
+
+### Service Worker
+
+Service Worker 是一种运行在浏览器背后的脚本，它充当 Web 应用、浏览器与网络之间的代理服务器。它们主要用于支持离线体验、拦截和处理网络请求以及资产缓存。
+
+-   **特点**：
+
+    -   Service Workers 运行在其自己的全局上下文中，与 Web Workers 类似，它们不依赖于任何 HTML 页面。
+    -   能够拦截和处理所有页面的网络请求。
+    -   支持离线体验和资源缓存。
+    -   用于实现推送通知和背景同步等功能。
+    -   生命周期独立于 Web 页面，需要通过事件（如`install`、`activate`、`fetch`等）来管理。
+
+-   **使用场景**：适用于制作离线应用、资源缓存、网络请求拦截处理、推送通知和背景数据同步等。
+
+### 总结
+
+-   **Web Workers**主要用于在后台线程中执行长时间运行或计算密集型任务，以免干扰主 UI 线程的性能。
+-   **Service Workers**主要用于在 Web 应用和网络之间提供一个代理，以实现离线体验、资源缓存、网络请求处理、推送通知等功能。
+
+虽然 Web Workers 和 Service Workers 都运行在浏览器的后台，并且与主线程分离，但它们服务的场景和目的有明显的不同。正确地利用这两种工作线程可以显著提升 Web 应用的性能和用户体验。
+
+<hr>
+
+## 👨🏻: 如何对比两个 json 对象
+
+🤖:对比两个 JSON 对象是否相等，主要有几种方法，取决于你需要进行深度对比还是浅度对比，以及对比的具体需求。
+
+### 1. 浅度对比（Shallow Comparison）
+
+如果你只需要比较第一层的键值对是否相等，可以手动遍历对象的属性进行对比。这种方法不会递归比较嵌套对象或数组。
+
+### 2. 深度对比（Deep Comparison）
+
+对于更复杂的情况，如果对象内部还包含嵌套的对象或数组，你需要进行深度对比。
+
+#### 自定义函数进行深度对比
+
+你可以写一个递归函数来比较每一个属性和属性值：
+
+```javascript
+function deepEqual(obj1, obj2) {
+	if (obj1 === obj2) {
+		return true;
+	}
+	if (
+		typeof obj1 !== "object" ||
+		obj1 === null ||
+		typeof obj2 !== "object" ||
+		obj2 === null
+	) {
+		return false;
+	}
+	const keysObj1 = Object.keys(obj1);
+	const keysObj2 = Object.keys(obj2);
+	if (keysObj1.length !== keysObj2.length) {
+		return false;
+	}
+	for (let key of keysObj1) {
+		if (!keysObj2.includes(key) || !deepEqual(obj1[key], obj2[key])) {
+			return false;
+		}
+	}
+	return true;
+}
+```
+
+#### 使用库函数
+
+一些 JavaScript 库，如 Lodash，提供了深度对比的功能，可以直接使用而无需自己实现：
+
+```javascript
+// 使用Lodash的isEqual方法
+_.isEqual(object1, object2);
+```
+
+### 3. JSON 序列化
+
+另一种比较简单的方法是将 JSON 对象序列化为字符串，然后直接比较这两个字符串：
+
+```javascript
+function jsonEqual(a, b) {
+	return JSON.stringify(a) === JSON.stringify(b);
+}
+```
+
+需要注意的是，这种方法依赖于对象属性的顺序。如果两个对象在结构上是相同的，但属性顺序不同，这种方法会错误地认为它们不等。因此，这种方法在某些情况下可能不太可靠。
+
+### 结论
+
+选择哪种方法取决于你的具体需求。如果你需要进行深度对比，并考虑到性能和准确性，使用递归函数或者第三方库（如 Lodash 的`isEqual`方法）可能是更好的选择。对于简单的需求，或者当对象结构相对固定时，使用 JSON 序列化方法可能足够快捷方便。
